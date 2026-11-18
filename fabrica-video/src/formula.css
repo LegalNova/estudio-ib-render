@@ -1,0 +1,22 @@
+/* Fórmulas del vídeo (Formula.tsx). KaTeX hereda el color del texto; aquí se
+   le quitan las mayúsculas y el espaciado de píldoras y ejes, y se ajusta su
+   tamaño a Inter y Playfair (KaTeX trae 1.21em, pensado para texto con serifa). */
+.rico-f .katex {
+  font-size: 1.1em;
+  text-transform: none;
+  letter-spacing: normal;
+  text-indent: 0;
+  -webkit-text-stroke-width: 0.012em;
+}
+
+/* Cada trozo de fórmula (hasta su «=») va entero: la línea solo se parte entre trozos. */
+.rico-tramo {
+  display: inline-block;
+  white-space: nowrap;
+  text-indent: 0;
+}
+
+/* Junto al texto en negrita, un trazo que engorda el de KaTeX. */
+.rico-grueso .katex {
+  -webkit-text-stroke-width: 0.03em;
+}

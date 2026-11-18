@@ -1,0 +1,100 @@
+# Render en paralelo de los vídeos de Estudio IB (una unidad por job, 540×960).
+# Origen: estudio-ib/fabrica-video/nube/render.yml (se copia aquí al empujar).
+# Lo lanza `npm run fabrica:video-nube`; a mano: Actions → render → Run workflow.
+
+name: render
+run-name: "Render ${{ inputs.unidades }} #${{ inputs.etiqueta }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      unidades:
+        description: "Unidades separadas por comas (p. ej. hi-weimar,ess-systems)"
+        required: true
+        type: string
+      etiqueta:
+        description: "Marca para encontrar la ejecución (la pone el orquestador)"
+        required: false
+        default: manual
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  lista:
+    runs-on: ubuntu-latest
+    outputs:
+      unidades: ${{ steps.l.outputs.unidades }}
+    steps:
+      - id: l
+        env:
+          UNIDADES: ${{ inputs.unidades }}
+        run: |
+          json=$(jq -cn --arg s "$UNIDADES" '$s | split(",") | map(gsub("\\s"; "")) | map(select(test("^[a-z0-9-]+$"))) | unique')
+          echo "Unidades: $json"
+          [ "$json" != "[]" ] || { echo "No hay unidades válidas"; exit 1; }
+          echo "unidades=$json" >> "$GITHUB_OUTPUT"
+
+  render:
+    needs: lista
+    name: ${{ matrix.unidad }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        unidad: ${{ fromJSON(needs.lista.outputs.unidades) }}
+    env:
+      UNIDAD: ${{ matrix.unidad }}
+    defaults:
+      run:
+        working-directory: fabrica-video
+    steps:
+      # Solo el proyecto y la unidad de este job (no las demás).
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            fabrica-video/src
+            fabrica-video/public/trabajo/_comun
+            fabrica-video/public/trabajo/${{ matrix.unidad }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: fabrica-video/package-lock.json
+
+      # Inter, Playfair e IBM Plex Mono vienen de @remotion/google-fonts. Los
+      # símbolos (✓ ✗ ✎ ⚠ →) y emojis necesitan fuentes del sistema.
+      - name: Fuentes del sistema
+        run: |
+          if ! fc-list | grep -qi "Noto Color Emoji"; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends fonts-noto-color-emoji fonts-dejavu-core > /dev/null
+            fc-cache -f > /dev/null
+          fi
+
+      - run: npm ci --no-audit --no-fund
+
+      # Chrome Headless Shell de Remotion (después de npm ci, que borra node_modules).
+      - name: Caché de Chrome
+        uses: actions/cache@v4
+        with:
+          path: fabrica-video/node_modules/.remotion
+          key: remotion-chrome-${{ runner.os }}-${{ hashFiles('fabrica-video/package-lock.json') }}
+
+      - run: npx remotion browser ensure
+
+      - name: Render
+        run: node render.mjs "$UNIDAD"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ matrix.unidad }}
+          path: fabrica-video/out/${{ matrix.unidad }}.mp4
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
