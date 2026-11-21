@@ -37,6 +37,14 @@ export const HILO_COLOR: Record<Hilo, string> = {
   energia: '#f5c542',
   carbono: '#38bdf8',
   perspectivas: '#a371f7',
+  examen: '#f87171',
+  negocio: '#fb923c',
+  entidades: '#60a5fa',
+  objetivos: '#34d399',
+  stakeholders: '#f472b6',
+  crecimiento: '#facc15',
+  mnc: '#22d3ee',
+  toolkit: '#c084fc',
 };
 
 export const HILO_ROTULO: Record<Hilo, string> = {
@@ -53,6 +61,14 @@ export const HILO_ROTULO: Record<Hilo, string> = {
   energia: 'ENERGÍA',
   carbono: 'CICLO DEL CARBONO',
   perspectivas: 'PERSPECTIVAS',
+  examen: 'TÉCNICA DE EXAMEN',
+  negocio: 'QUÉ ES UN NEGOCIO',
+  entidades: 'TIPOS DE ENTIDAD',
+  objetivos: 'OBJETIVOS Y RSC',
+  stakeholders: 'STAKEHOLDERS',
+  crecimiento: 'CRECIMIENTO',
+  mnc: 'MULTINACIONALES',
+  toolkit: 'TOOLKIT',
 };
 
 /** Rótulos del estilo «dinamico» (vídeo en inglés). */
@@ -70,6 +86,14 @@ export const HILO_ROTULO_EN: Record<Hilo, string> = {
   energia: 'ENERGY',
   carbono: 'CARBON CYCLE',
   perspectivas: 'PERSPECTIVES',
+  examen: 'EXAM SKILLS',
+  negocio: 'WHAT IS A BUSINESS',
+  entidades: 'BUSINESS ENTITIES',
+  objetivos: 'OBJECTIVES',
+  stakeholders: 'STAKEHOLDERS',
+  crecimiento: 'GROWTH',
+  mnc: 'MULTINATIONALS',
+  toolkit: 'TOOLKIT',
 };
 
 /** Colores de los narradores. */

@@ -588,6 +588,52 @@ const Tabla: React.FC<P<De<'tabla'>>> = ({ v, t, dur, color }) => {
   );
 };
 
+// ─── Imagen (diapositiva o diagrama entero) ──────────────────────────────
+
+const ImagenVista: React.FC<P<De<'imagen'>>> = ({ v, t, dur, color }) => {
+  const { w, h } = useEscenario();
+  const [fallo, setFallo] = useState(false);
+  const k = muelle(t, 4);
+  const zoom = interpolate(t, [0, dur], [1, 1.035], clamp);
+  const arriba = v.titulo ? 66 : 0;
+  const abajo = v.pie ? 54 : 0;
+  const claro = v.fondo !== 'oscuro';
+  return (
+    <Caja>
+      {v.titulo ? <Titulo texto={v.titulo} color={color} t={t} /> : null}
+      <div
+        style={{
+          position: 'absolute', left: 0, right: 0, top: arriba, bottom: abajo, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          opacity: Math.min(1, k), transform: `translateY(${(1 - Math.min(1, k)) * 30}px) scale(${0.94 + 0.06 * Math.min(1, k)})`,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '100%', maxHeight: '100%', padding: claro ? 14 : 0, borderRadius: 18, overflow: 'hidden',
+            background: claro ? '#ffffff' : 'transparent', boxShadow: `0 18px 60px rgba(0,0,0,0.45), 0 0 0 2px ${alfa(color, 0.55)}`,
+            display: 'flex',
+          }}
+        >
+          {fallo ? (
+            <div style={{ width: w * 0.6, height: (h - arriba - abajo) * 0.6, display: 'grid', placeItems: 'center', color: T.tenue, fontSize: 26 }}>Imagen no disponible</div>
+          ) : (
+            <Img
+              src={v.url}
+              maxRetries={3}
+              delayRenderTimeoutInMilliseconds={60000}
+              onError={() => setFallo(true)}
+              style={{ display: 'block', maxWidth: w - 28, maxHeight: h - arriba - abajo - 28, objectFit: 'contain', transform: `scale(${zoom})` }}
+            />
+          )}
+        </div>
+      </div>
+      {v.pie ? (
+        <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, textAlign: 'center', fontSize: 26, fontWeight: 600, color: T.tenue, opacity: Math.min(1, muelle(t, 16)) }}>{v.pie}</div>
+      ) : null}
+    </Caja>
+  );
+};
+
 export const VisualESS: React.FC<{ v: Visual; t: number; dur: number; color: string }> = ({ v, t, dur, color }) => {
   switch (v.tipo) {
     case 'sistema': return <Sistema v={v} t={t} dur={dur} color={color} />;
@@ -596,6 +642,7 @@ export const VisualESS: React.FC<{ v: Visual; t: number; dur: number; color: str
     case 'piramide': return <Piramide v={v} t={t} dur={dur} color={color} />;
     case 'ciclo': return <Ciclo v={v} t={t} dur={dur} color={color} />;
     case 'tabla': return <Tabla v={v} t={t} dur={dur} color={color} />;
+    case 'imagen': return <ImagenVista v={v} t={t} dur={dur} color={color} />;
     default: return null;
   }
 };

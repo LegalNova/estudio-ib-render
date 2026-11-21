@@ -1,0 +1,92 @@
+# Render en paralelo de capítulos de «la tela» (TelaVideo, 1280×720): un job por
+# capítulo. Origen: estudio-ib/fabrica-video/nube/tela.yml. Lo lanza
+# scripts/fabrica/tela-nube.ts; el MP4 queda como artifact `tela-<id>`.
+
+name: tela
+run-name: "Tela ${{ inputs.ids }} #${{ inputs.etiqueta }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      ids:
+        description: "Capítulos separados por comas (p. ej. ess-t2-p1a,ess-t2-p2a)"
+        required: true
+        type: string
+      etiqueta:
+        required: false
+        default: manual
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  lista:
+    runs-on: ubuntu-latest
+    outputs:
+      ids: ${{ steps.l.outputs.ids }}
+    steps:
+      - id: l
+        env:
+          IDS: ${{ inputs.ids }}
+        run: |
+          json=$(jq -cn --arg s "$IDS" '$s | split(",") | map(gsub("\\s"; "")) | map(select(test("^[a-z0-9-]+$"))) | unique')
+          echo "Capítulos: $json"
+          [ "$json" != "[]" ] || { echo "No hay capítulos válidos"; exit 1; }
+          echo "ids=$json" >> "$GITHUB_OUTPUT"
+
+  render:
+    needs: lista
+    name: ${{ matrix.id }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        id: ${{ fromJSON(needs.lista.outputs.ids) }}
+    defaults:
+      run:
+        working-directory: fabrica-video
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            fabrica-video/src
+            fabrica-video/public/trabajo/${{ matrix.id }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: fabrica-video/package-lock.json
+
+      - name: Fuentes del sistema
+        run: |
+          if ! fc-list | grep -qi "Noto Color Emoji"; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends fonts-noto-color-emoji fonts-dejavu-core > /dev/null
+            fc-cache -f > /dev/null
+          fi
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Caché de Chrome
+        uses: actions/cache@v4
+        with:
+          path: fabrica-video/node_modules/.remotion
+          key: remotion-chrome-${{ runner.os }}-${{ hashFiles('fabrica-video/package-lock.json') }}
+
+      - run: npx remotion browser ensure
+
+      - name: Render
+        run: node render-tela.mjs "${{ matrix.id }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tela-${{ matrix.id }}
+          path: fabrica-video/out/${{ matrix.id }}.mp4
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error

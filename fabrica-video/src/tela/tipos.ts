@@ -10,7 +10,9 @@
 export type Hilo =
   | 'inicio' | 'leyes' | 'terror' | 'elites' | 'adoctrinamiento' | 'sociedad' | 'resumen'
   // ESS (vídeo en inglés, estilo «dinamico»).
-  | 'sistemas' | 'sostenibilidad' | 'ecologia' | 'energia' | 'carbono' | 'perspectivas';
+  | 'sistemas' | 'sostenibilidad' | 'ecologia' | 'energia' | 'carbono' | 'perspectivas'
+  // Business Management (vídeo en inglés, estilo «dinamico»).
+  | 'examen' | 'negocio' | 'entidades' | 'objetivos' | 'stakeholders' | 'crecimiento' | 'mnc' | 'toolkit';
 
 /** «personajes» (Historia: narradores dibujados) o «dinamico» (ESS: sin narradores, en inglés, cámara y tipografía en movimiento). */
 export type EstiloTela = 'personajes' | 'dinamico';
@@ -65,7 +67,9 @@ export type Visual =
   /** Red de almacenes (x, y de 0 a 1 dentro del escenario) con flujos curvos y partículas. */
   | { tipo: 'ciclo'; titulo: string; almacenes: Array<{ id: string; etiqueta: string; valor?: string; x: number; y: number }>; flujos: Array<{ de: string; a: string; etiqueta: string }> }
   /** Tabla: las filas aparecen una a una; los números se cuentan. */
-  | { tipo: 'tabla'; titulo: string; columnas: string[]; filas: string[][] };
+  | { tipo: 'tabla'; titulo: string; columnas: string[]; filas: string[][] }
+  /** Imagen o diapositiva entera (sin recortar) en una tarjeta, con título y pie opcionales. url https. fondo «claro» para diapositivas blancas. */
+  | { tipo: 'imagen'; url: string; titulo?: string; pie?: string; fondo?: 'claro' | 'oscuro' };
 
 export type Curva = 'S' | 'J' | 'equilibrio-estable' | 'equilibrio-inestable' | 'estado-estacionario' | 'punto-inflexion';
 
