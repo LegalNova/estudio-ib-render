@@ -38,14 +38,14 @@ export const RemotionRoot: React.FC = () => (
       defaultProps={DEMO_TELA}
       calculateMetadata={calcularTela}
     />
-    {/* ClipTela: vertical 1080×1920, ~30 s, para el feed de clips de la app. */}
+    {/* ClipTela: vertical 1080×2340 (19,5:9), ~30 s, para Clips IB. */}
     <Composition
       id="ClipTela"
       component={ClipTela}
       durationInFrames={300}
       fps={30}
       width={1080}
-      height={1920}
+      height={2340}
       defaultProps={DEMO_CLIP}
       calculateMetadata={calcularClip}
     />

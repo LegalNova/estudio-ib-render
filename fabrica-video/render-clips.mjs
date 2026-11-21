@@ -1,7 +1,7 @@
 // node render-clips.mjs <id> [<id>…] [--concurrency=N]
 //
-// Render de clips verticales del feed (composición ClipTela, 1080×1920) con un
-// solo bundle para todos: Remotion pinta a 720×1280 (--scale 2/3), H.264 crf 28
+// Render de clips verticales del feed (composición ClipTela, 1080×2340) con un
+// solo bundle para todos: Remotion pinta a 720×1560 (--scale 2/3), H.264 crf 28
 // con tope ~1,1 Mbps; ffmpeg deja el audio en AAC mono 80 kbps con faststart y
 // saca un póster JPG. Igual en el Mac y en GitHub Actions (workflow clips.yml).
 //

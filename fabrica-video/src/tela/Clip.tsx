@@ -6,11 +6,12 @@ import { VisualVista } from './Visuales';
 import { FotoSangre } from './VisualesESS';
 import type { EscenaMedida, TurnoMedido } from './tipos';
 
-// Clip vertical (1080×1920, 30 fps) de ~30 s para el feed de la app: una
+// Clip vertical (1080×2340 = 19,5:9, la forma de los iPhone actuales; 30 fps) de ~30 s para el feed de la app: una
 // escena de «la tela» (o un trozo de ella) con su visual, el título arriba y
 // subtítulos grandes palabra a palabra. Zonas libres para la interfaz de la
-// app (botones a la derecha, como TikTok): el 17 % derecho desde la mitad
-// hacia abajo y el 15 % de abajo.
+// app, que va encima a pantalla completa: arriba el 13 % (estado + barra de
+// asignaturas), a la derecha el 17 % de la mitad para abajo (botones, como
+// TikTok) y abajo el 18 % (barra de inicio y progreso).
 
 export type PropsClip = {
   id: string;
@@ -35,7 +36,7 @@ export const calcularClip: CalculateMetadataFunction<PropsClip> = ({ props }) =>
 
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 const W = 1080;
-const H = 1920;
+const H = 2340;
 /** Escenario del visual: se dibuja en 800×600 y se amplía ×1,06 (≈ 848×636, hasta x = 892) para dejar libre la columna de botones. */
 const ESCENARIO_CLIP = { x: 0, y: 0, w: 800, h: 600 };
 const ZOOM_VISUAL = 1.06;
@@ -88,7 +89,7 @@ const Cabecera: React.FC<{ p: PropsClip; color: string; sobreFoto: boolean }> = 
   }
   const sombra = sobreFoto ? '0 3px 18px rgba(0,0,0,0.75)' : undefined;
   return (
-    <div style={{ position: 'absolute', left: 64, right: 64, top: 230 }}>
+    <div style={{ position: 'absolute', left: 64, right: 64, top: 340 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, opacity: Math.min(1, k), transform: `translateY(${(1 - Math.min(1, k)) * 14}px)` }}>
         <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: 4, color, textShadow: sombra }}>{p.materia.toUpperCase()}</div>
         {e.unidad ? (
@@ -180,7 +181,7 @@ const Subtitulos: React.FC<{ turnos: TurnoMedido[]; nombres: { H: string; E: str
   const color = COLOR_VOZ[actual.q];
   const k = interpolate(s, [actual.inicio, actual.inicio + 0.12], [0, 1], clamp);
   return (
-    <div style={{ position: 'absolute', left: 64, right: 210, top: 1340 }}>
+    <div style={{ position: 'absolute', left: 64, right: 210, top: 1530 }}>
       <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: 3, color, marginBottom: 12 }}>{nombres[actual.q].toUpperCase()}</div>
       <div style={{ fontSize: 60, fontWeight: 800, lineHeight: 1.14, color: T.texto, textShadow: '0 4px 22px rgba(0,0,0,0.65)', transform: `translateY(${(1 - k) * 10}px)`, opacity: 0.4 + 0.6 * k }}>
         {actual.palabras.map((w, i) => {
@@ -218,7 +219,7 @@ export const ClipTela: React.FC<PropsClip> = (p) => {
           <EscenarioCtx.Provider value={ESCENARIO_CLIP}>
             <div
               style={{
-                position: 'absolute', left: 44, top: 640, width: ESCENARIO_CLIP.w, height: ESCENARIO_CLIP.h, transformOrigin: '0 0',
+                position: 'absolute', left: 44, top: 770, width: ESCENARIO_CLIP.w, height: ESCENARIO_CLIP.h, transformOrigin: '0 0',
                 transform: `scale(${ZOOM_VISUAL * (1 + 0.025 * interpolate(frame, [0, p.duracion * FPS], [0, 1], clamp))})`,
               }}
             >
